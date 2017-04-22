@@ -2,11 +2,13 @@
   (:require [compojure.core :refer :all]
             [compojure.route :as route]
             [t2000.twitlib :as twitlib]
-            [ring.util.response :refer [response content-type]]
+            [ring.util.response :refer [response redirect content-type]]
             [ring.middleware.cors :refer [wrap-cors]]
             [ring.middleware.defaults :refer [wrap-defaults site-defaults]]))
 
-(defroutes app-routes  
+(defroutes app-routes
+  (GET "/" [] (redirect "/index.html"))
+  
   (GET "/data" []
        (-> (twitlib/get-data)
            response
