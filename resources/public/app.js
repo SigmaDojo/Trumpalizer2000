@@ -1,5 +1,5 @@
 function getData(callback) {
-	d3.json("http://10.13.3.67:3000/data", callback);
+	d3.json("/data", callback);
 	/*
 	callback({
 		type: "barchart",
