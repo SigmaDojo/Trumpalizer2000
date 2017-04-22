@@ -6,14 +6,11 @@
             [ring.middleware.cors :refer [wrap-cors]]
             [ring.middleware.defaults :refer [wrap-defaults site-defaults]]))
 
-(defroutes app-routes
-  (GET "/" [] "Hello World")
-  
+(defroutes app-routes  
   (GET "/data" []
        (-> (twitlib/get-data)
            response
            (content-type "application/json")))
-  
   (route/not-found "Not Found"))
 
 (def app
