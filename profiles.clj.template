@@ -1,7 +1,7 @@
 ;; Make a copy of this file and name it `profiles.clj`.
 ;; Add your consumer key and secret below.
 
-{:dev
+{:dev-overrides
  {:env
   {
    :twitlib-consumer-key "<ENTER CONSUMER KEY HERE>"

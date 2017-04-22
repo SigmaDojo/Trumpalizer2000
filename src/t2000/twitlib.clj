@@ -26,20 +26,24 @@
   (json/read-str s :key-fn keyword))
 
 
-(defn body->json  [{:keys [status headers body error]}]
-  (when-not error
+(defn parse-json-body
+  "Return a clojure map from the json body.
+  If error, print the response and return nil."
+  [{:keys [body error] :as response}]
+  (if error
+    (println response)
     (json->map body)))
+
 
 
 ;;;
 ;;; Connect to Twitter
 ;;;
 
-(defn request-token-callback [{:keys [status headers body error]}]
-  (when-not error
-    (let [data (json->map body)]
-      (when (= (:token_type data) "bearer")
-        (:access_token data)))))
+(defn request-token-callback [response]
+  (let [data (parse-json-body response)]
+    (when (= (:token_type data) "bearer")
+      (:access_token data))))
 
 
 (defn request-token []
@@ -63,13 +67,15 @@
 ;;
 ;;
 
+
+
 (defn search []
   (let [search-url "https://api.twitter.com/1.1/search/tweets.json?q=from:realDonaldTrump&count=100"]
-    @(http/get search-url {:oauth-token @token} body->json)))
+    @(http/get search-url {:oauth-token @token} parse-json-body)))
 
 
-(def cached-search
-  (delay (search)))
+(def cached-tweets
+  (delay (:statuses (search))))
 
 
 (defn tweets->date
@@ -81,6 +87,7 @@
 
 
 ;; TODO: generate this?
+;; (def empty-freq  (zipmap (map #(format "%02d" %) (range 24)) (repeat 0)))
 (def empty-freq {"00" 0
                  "01" 0
                  "02" 0
@@ -107,6 +114,8 @@
                  "23" 0})
 
 
+
+
 (defn extract-hour [date]
   (f/unparse (f/formatter "HH") date))
 
@@ -125,10 +134,5 @@
 (defn get-data []
   (json/write-str
    {:type "barchart"
-    :data (tweet-freq->coords (:statuses @cached-search))}))
-
-
-
-
-
+    :data (tweet-freq->coords @cached-tweets)}))
 
