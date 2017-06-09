@@ -19,10 +19,9 @@
 
   :main t2000.server
   
-  :ring {:handler t2000.handler/app}
+  :ring {:handler t2000.server/app}
 
   :profiles {:dev [:dev-defaults :dev-overrides]
-             :dev-defaults {:source-paths ["dev"]
-                            :dependencies [[javax.servlet/servlet-api "2.5"]
-                                           [ring/ring-mock "0.3.0"]
+             :dev-defaults {:dependencies [[javax.servlet/servlet-api "2.5"]
+                                          ;; [ring/ring-mock "0.3.0"]
                                            ]}})
