@@ -31,10 +31,13 @@
 (defonce server (atom nil))
 
 (defn start-server []
-  (reset! server (run-server #'app {:port 3000 :join? false})))
+  (let [port 3000]
+    (reset! server (run-server #'app {:port port :join? false}))
+    (println (str "Http server started on http://127.0.0.1:" port))))
 
 (defn stop-server []
   (if-let [stop-fn @server]
     (stop-fn))
-  (reset! server nil))
+  (reset! server nil)
+  (println "Http server stopped."))
 
