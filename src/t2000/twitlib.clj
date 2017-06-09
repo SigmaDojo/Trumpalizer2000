@@ -63,19 +63,24 @@
   (delay (request-token)))
 
 
+(defn http-get
+  "Send http GET including twitter authentication.
+  Return json converted into clojure data structure."
+  [url]
+  @(http/get url {:oauth-token @token} parse-json-body))
+
+
 ;;
 ;;
 ;;
 
 
-
-(defn search []
-  (let [search-url "https://api.twitter.com/1.1/search/tweets.json?q=from:realDonaldTrump&count=100"]
-    @(http/get search-url {:oauth-token @token} parse-json-body)))
+(def search-url
+  "https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=realDonaldTrump&count=200")
 
 
 (def cached-tweets
-  (delay (:statuses (search))))
+  (delay (http-get search-url)))
 
 
 (defn tweets->date
@@ -114,16 +119,14 @@
                  "23" 0})
 
 
-
-
 (defn extract-hour [date]
   (f/unparse (f/formatter "HH") date))
 
 
 (defn group-tweets [tweets]
-  (let [dates (map extract-hour (tweets->date tweets))]
+  (let [hours (map extract-hour (tweets->date tweets))]
     (merge empty-freq
-           (frequencies dates))))
+           (frequencies hours))))
 
 
 (defn tweet-freq->coords [tweets]
