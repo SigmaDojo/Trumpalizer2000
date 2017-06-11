@@ -3,6 +3,7 @@
              [compojure.core :refer :all]
              [compojure.route :as route]
              [t2000.core :as t2c]
+             [environ.core :refer [env]]
              [ring.util.response :refer [response redirect content-type]]
              [ring.middleware.cors :refer [wrap-cors]]
              [ring.middleware.defaults :refer [wrap-defaults site-defaults]]))
@@ -31,7 +32,7 @@
 (defonce server (atom nil))
 
 (defn start-server []
-  (let [port 3000]
+  (let [port (get env :twitlib-http-port 3000)]
     (reset! server (run-server #'app {:port port :join? false}))
     (println (str "Http server started on http://127.0.0.1:" port))))
 
@@ -41,3 +42,6 @@
   (reset! server nil)
   (println "Http server stopped."))
 
+(defn restart-server []
+  (stop-server)
+  (start-server))

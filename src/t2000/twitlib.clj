@@ -32,7 +32,6 @@
     (json->map body)))
 
 
-
 ;;;
 ;;; Connect to Twitter
 ;;;

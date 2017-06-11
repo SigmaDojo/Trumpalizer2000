@@ -4,7 +4,6 @@
             [clojure.data.json :as json]))
 
 
-
 (def search-url
   "https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=realDonaldTrump&count=200")
 
@@ -17,7 +16,6 @@
   "Extract create-date from each tweet"
   [tweets]
   (map #(twit/parse-twitter-date (:created_at %)) tweets))
-
 
 
 ;; (def empty-freq  (zipmap (map #(format "%02d" %) (range 24)) (repeat 0)))
@@ -33,7 +31,12 @@
   (f/unparse (f/formatter "HH") date))
 
 
-(defn group-tweets [tweets]
+(defn group-tweets
+  "Takes a list of tweets, groups them based on the hour
+  they were sent, and count the frequency of each group.
+
+  Returns a map from hour-of-the-day to number-of-tweets-sent."
+  [tweets]
   (into (sorted-map)
         (merge empty-freq
                (frequencies (map extract-hour (tweets->date tweets))))))

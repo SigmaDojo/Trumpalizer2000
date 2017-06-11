@@ -6,6 +6,7 @@
   {
    :twitlib-consumer-key "<ENTER CONSUMER KEY HERE>"
    :twitlib-consumer-secret "<ENTER CONSUMER SECRET HERE>"
+   :twitlib-http-port 3000
    }
   }
  }
