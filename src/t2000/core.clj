@@ -3,13 +3,43 @@
             [clj-time.format :as f]
             [clojure.data.json :as json]))
 
+(def ^:dynamic *URL*
+  "https://api.twitter.com/1.1/statuses/user_timeline.json")
 
-(def search-url
-  "https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name=realDonaldTrump&count=200")
+
+(def tweet-store (atom []))
+
+(defn- query-params
+  "Return query params for twitter HTTP query.
+  Include max_id if max-id is greater than zero."
+  [batch-size max-id]
+  (let [base-options {"screen_name" "realDonaldTrump"
+                      "count" batch-size}]
+    {:query-params (merge base-options (when (pos? max-id) {"max_id" max-id}))}))
+
+(defn find-lowest-id [tweets]
+  (if-not (empty? tweets)
+    (transduce (map :id) min Long/MAX_VALUE tweets)
+    0))
+
+(defn get-next-batch! [batch-size]
+  (let [max-id (dec (find-lowest-id @tweet-store))
+        options (query-params batch-size max-id)
+        next-batch (twit/http-get *URL* options)]
+    (swap! tweet-store into next-batch)
+    (count next-batch)))
+
+(defn get-batch! [num-batches batch-size]
+  (dotimes [n num-batches]
+    (get-next-batch! batch-size))
+  @tweet-store)
 
 
+
+;; TODO: should fix this weird combo of delay and atom...
+;; Fetch 5*200 tweets
 (def cached-tweets
-  (delay (twit/http-get search-url)))
+  (delay (get-batch! 5 200)))
 
 
 (defn tweets->date
@@ -47,6 +77,8 @@
         (group-tweets tweets)))
 
 
+;; TODO: I don't want to send :type "barchart" - that's for the UI to decide.
+;; I just want to send data.
 (defn get-data []
   (json/write-str
    {:type "barchart"
