@@ -32,7 +32,7 @@
 (defonce server (atom nil))
 
 (defn start-server []
-  (let [port (get env :twitlib-http-port 3000)]
+  (let [port (Integer/parseInt (get env :twitlib-http-port 3000))]
     (reset! server (run-server #'app {:port port :join? false}))
     (println (str "Http server started on http://127.0.0.1:" port))))
 
