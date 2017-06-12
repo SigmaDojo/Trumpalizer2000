@@ -62,7 +62,9 @@
 (defn http-get
   "Send http GET including twitter authentication.
   Return json converted into clojure data structure."
-  [url]
-  @(http/get url {:oauth-token @token} parse-json-body))
+  ([url]
+   (http-get url {}))
+  ([url options]
+   @(http/get url (merge options {:oauth-token @token}) parse-json-body)))
 
 
