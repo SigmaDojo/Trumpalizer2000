@@ -1,132 +1,87 @@
-function getData(callback) {
-	d3.json("/data", callback);
-	/*
-	callback({
-		type: "barchart",
-		data: [{x: 6, y: 4}, {x: 1, y: 8}, {x: 2, y: 15}, {x: 3, y: 16}, {x: 4, y: 23}, {x: 5, y: 42}]
-	})
-	*/
+const datasrc = "";
+
+const users = [
+	{"username": "realDonaldTrump", "display": "President Trump"},
+	{"username": "barackobama", "display": "President Emeritus Obama"},
+	{"username": "andonilsson", "display": "Anders Nilsson"},
+	{"username": "theexcellentnin", "display": "Johan Fogelström"},
+	{"username": "martintiinus", "display": "Martin Tiinus"},
+	{"username": "fredrikalserin", "display": "Fredrik Alserin"},
+];
+
+const methods = [
+	{"value": "byDay", "name": "Veckodag"},
+	{"value": "byHour", "name": "Timme"},
+];
+
+function populateUsers(select) {
+	for (const i in users) {
+		select.append(`<option value="${users[i].username}">${users[i].display}</option>"`)
+	}
 }
 
-const colors = [
-	"cyan",
-	"lime",
-	"red",
-	"pink",
-	"purple",
-	"silver",
-	"blue"
-]
-
-function getColor(n) {
-	return colors[n % colors.length]
+function populateMethods(select) {
+	for (const i in methods) {
+		select.append(`<option value="${methods[i].value}">${methods[i].name}</option>"`)
+	}
 }
 
-function barchart(list) {
-	const max_value = list
-	.map(d => d.y)
-	.reduce( function(max, d) {
-		return (d > max) ? d : max;
-	}, 0);
+function getData(target, method, callback) {
+	d3.json(datasrc + `/timeline/${target}/${method}`, callback);
+	//d3.json(datasrc + "/data", callback);
+}
 
-	const width = 400;
-	const height = 400;
-	const padding = 1;
-	const scale = 90;
+function updateProfile(user) {
+	$("img.profile-photo").attr('src', user.profile_image_url);
+	$(".profile-name").text(user.name);
+}
 
-	const xScale = d3.scaleLinear()
-		.domain([0, d3.max(list, function(d) { return d.x; })])
-		.range([0, width]);
+function c3data(data) {
+	return {
+		type: 'bar',
+		json: data,
+		keys: {
+			x: 'x', // it's possible to specify 'x' when category axis
+			value: ['y']
+		},
+		names: {
+			y: '# of tweets'
+		}
+	}
+}
 
-	const yScale = d3.scaleLinear()
-		.domain([0, d3.max(list, function(d) { return d.y; })])
-		.range([0, height]);
+function diagram(identifier, data) {
+	var chart = c3.generate({
+		bindto: identifier,
+		data: c3data(data)
+	});
 
-
-	//Create SVG element
-	var svg = d3.select("#diagram")
-		.append("svg")
-		.attr("viewBox", `0 0 ${width} ${height}`)
-		//.attr("width", width)
-		//.attr("height", height);
-
-	svg.selectAll("rect")
-		.data(list)
-		.enter()
-		.append("rect")
-		.attr("x", function(d, i) {
-			return i * (width / list.length);
-		})
-		.attr("y", d => height - yScale(d.y))
-		.attr("width", width / list.length - padding)
-		.attr("height", d => yScale(d.y) - 30)
-		.attr("fill", "teal");
-
-	svg.selectAll("text.value")
-		.data(list)
-		.enter()
-		.append("text")
-		.text(function(d) {
-			return (d.y != 0) ? d.y: "";
-		})
-		.attr("text-anchor", "middle")
-
-		.attr("font-family", "sans-serif")
-		.attr("font-size", "11px")
-
-		.attr("x", function(d, i) {
-			return i * (width / list.length) + (width / list.length - padding) / 2;
-		})
-		.attr("y", function(d) {
-			console.log((yScale(d.y) < 24) ? 24 : 0);
-			return height - yScale(d.y) + ((yScale(d.y) > 50) ? 24 : -5);
-		});
-
-
-	svg.selectAll("text.label")
-		.data(list)
-		.enter()
-		.append("text")
-		.text(function(d) {
-			if (typeof(d.label) == 'undefined') {
-				return d.x;
-			}
-			return d.label;
-		})
-
-		.attr("text-anchor", "middle")
-		.attr("font-family", "sans-serif")
-		.attr("font-size", "8px")
-
-		.attr("x", function(d, i) {
-			return i * (width / list.length) + (width / list.length - padding) / 2;
-		})
-		.attr("y", function(d) {
-			return height - 10;
-		});
-
-
-/*
-	d3.select("#diagram")
-		.attr("class", "barchart")
-		.selectAll("p")
-		.data(list)
-		.enter().append("div")
-		.attr("class", "bar vertical")
-		.style("background-color", function(d, i) {return getColor(i)})
-		.style("height", function(d) {
-			return (yScale(d.y)/max_value)*75 + "%";
-		})
-		.text(d => yScale(d.y));
-		*/
+	return  function(data) {
+		chart.load(c3data(data));
+	}
 }
 
 function main() {
-	getData( function (res) {
-		res.data.sort((a, b) => a.x - b.x);
-		barchart(res.data);
-	});
+	populateUsers($(".controls #target"));
+	populateMethods($(".controls #method"));
 
+	let fetch = function(callback) {
+		getData(
+			$(".controls #target").val(),
+			$(".controls #method").val(),
+			callback);
+	}
+
+	fetch(function (res) {
+		updateProfile(res.user)
+		let updater = diagram('#diagram', res.data);
+		$(".controls form").change(function () {
+			fetch(function (res) {
+				updateProfile(res.user)
+				updater(res.data);
+			});
+		});
+	});
 }
 
 main();

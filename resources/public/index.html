@@ -3,18 +3,43 @@
 <head>
 <meta charset="UTF-8">
 <title>Trumpalizer 2000&#8482;</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.css" rel="stylesheet" />
 <link rel="stylesheet" type="text/css" href="app.css">
 </head>
 <body>
 	<div class="wrapper">
 		<h1>Trumpalizer 2000&#8482;</h1>
 		<h2>The Hitchhiker's guide to the Dark Side&#169; of Twitter&#8482;</h2>
-		<div id="diagram">
+		<div class="box wrapper">
+			<div class="profile">
+			<img class="profile-photo" />
+			<span class="profile-name"></span>
+			</div>
+			<div id="diagram">
+			</div>
+		</div>
+
+		<div class="controls box wrapper">
+			<h3>Inställningar:</h3>
+			<form>
+				<fieldset>
+					<label>Metod</label>
+					<select name="method" id="method">
+					</select>
+
+					<label>Användare:</label>
+					<select name="target" id="target">
+					</select>
+				</fieldset>
+
+			</form>
 		</div>
 	</div>
 </body>
 
-<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.js"></script>
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.13/c3.min.js"></script>
 <script src="app.js"></script>
 
 </html>
