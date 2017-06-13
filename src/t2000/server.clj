@@ -10,6 +10,16 @@
 
 (defroutes app-routes
   (GET "/" [] (redirect "/index.html"))
+
+  (GET "/timeline/:user/:method" [user method]
+       (-> (t2c/get-timeline user method)
+           response
+           (content-type "application/json")))
+  
+  (GET "/search/:query/:method" [query method]
+       (-> (t2c/get-search query method)
+           response
+           (content-type "application/json")))
   
   (GET "/data" []
        (-> (t2c/get-data)
